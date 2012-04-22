@@ -2269,6 +2269,37 @@ prepare_task_switch(struct rq *rq, struct task_struct *prev,
 	fire_sched_out_preempt_notifiers(prev, next);
 	prepare_lock_switch(rq, next);
 	prepare_arch_switch(next);
+#ifdef CONFIG_CPU_IDLERUNTIME
+	if (is_idle_task(next)) {
+		int cpu = raw_smp_processor_id();
+
+		if (per_cpu(idlestop, cpu)) {
+			unsigned long flags;
+
+			raw_spin_lock_irqsave(&per_cpu(idleruntime_lock, cpu),
+			    flags);
+			per_cpu(idlestart, cpu) = cpu_clock(cpu);
+			per_cpu(runtime, cpu) +=
+			    per_cpu(idlestart, cpu) - per_cpu(idlestop, cpu);
+			raw_spin_unlock_irqrestore(&per_cpu(idleruntime_lock,
+			    cpu), flags);
+		}
+	} else if (is_idle_task(prev)) {
+		int cpu = raw_smp_processor_id();
+
+		if (per_cpu(idlestart, cpu)) {
+			unsigned long flags;
+
+			raw_spin_lock_irqsave(&per_cpu(idleruntime_lock, cpu),
+			    flags);
+			per_cpu(idlestop, cpu) = cpu_clock(cpu);
+			per_cpu(idletime, cpu) +=
+			    per_cpu(idlestop, cpu) - per_cpu(idlestart, cpu);
+			raw_spin_unlock_irqrestore(&per_cpu(idleruntime_lock,
+			    cpu), flags);
+		}
+	}
+#endif
 }
 
 /**

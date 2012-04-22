@@ -417,6 +417,18 @@ config BSD_PROCESS_ACCT_V3
 	  for processing it. A preliminary version of these tools is available
 	  at <http://www.gnu.org/software/acct/>.
 
+config CPU_IDLERUNTIME
+	bool "Provide individual CPU usage measurement based on idle processing"
+	help
+	  If you say Y here, individual CPU usage data will be provided that are
+	  based on idle processing. The data are available for every CPU in
+	  /proc/cpuload/cpuN/data in the format "<idletime> <runtime>". The
+	  counters can be reset by writing to /proc/cpuload/resetall for all
+	  CPUs and to /proc/cpuload/cpuN/reset for a particular CPU,
+	  respectively. To calculate the usage since the most recent reset,
+	  the runtime must be devided by the sum of idletime plus runtime, e.g.
+	    cat /proc/cpuload/cpu0/data | awk '{print (100.0*$2) / ($1+$2)"%"}'
+
 config TASKSTATS
 	bool "Export task/process statistics through netlink"
 	depends on NET
