@@ -812,7 +812,7 @@ config BUILD_BIN2C
 config IKCONFIG
 	tristate "Kernel .config support"
 	select BUILD_BIN2C
-	---help---
+	help
 	  This option enables the complete Linux kernel ".config" file
 	  contents to be saved in the kernel. It provides documentation
 	  of which kernel options are used in a running kernel or in an
@@ -825,9 +825,53 @@ config IKCONFIG
 config IKCONFIG_PROC
 	bool "Enable access to .config through /proc/config.gz"
 	depends on IKCONFIG && PROC_FS
-	---help---
+	help
 	  This option enables access to the kernel configuration file
 	  through /proc/config.gz.
+
+	  Select this if you are using an official mainline kernel and
+	  you want to enable your users to rebuilt a functionally
+	  identical kernel without requiring any more information.
+
+config IKPATCHSET
+	tristate "Kernel patchset support"
+	depends on PROC_FS
+	select IKCONFIG
+	help
+	  This option enables the complete patchset, if any, to be saved
+	  in the kernel. The patchset can be extracted from a kernel image
+	  file using the script scripts/extract-ikpatchset. It is also
+	  possible to extract the patchset from a running kernel via
+	  /proc/patchset.tar.gz. The vanilla kernel version on which the
+	  patchset is based is available in the file "baseversion" of the
+	  archive. Thus, the following command sequence will create a
+	  patched kernel source tree from which an identical kernel can be
+	  rebuilt (assumes that IKPATCHSET_PROC is also configured):
+	    tar zxf /proc/patchset.tar.gz baseversion
+	    major=`cut -d. -f1 baseversion`
+	    urldir=http://www.kernel.org/pub/linux/kernel/v$major.x
+	    dir=linux-`cat baseversion`
+	    rm -f baseversion
+	    archive=$dir.tar.xz
+	    wget $urldir/$archive
+	    tar Jxf $archive
+	    cd $dir
+	    tar zxf /proc/patchset.tar.gz
+	    quilt push -a
+	    zcat /proc/config.gz >.config
+
+config IKPATCHSET_PROC
+	bool "Enable access to patchset.tar.gz through /proc/patchset.tar.gz"
+	depends on IKPATCHSET && PROC_FS
+	select IKCONFIG_PROC
+	help
+	  This option enables access to the patchset used when building the
+	  current kernel through /proc/patchset.tar.gz.
+
+	  Select this if you are using an official mainline kernel with
+	  off-tree patches (quilt queue) and you want to enable your users to
+	  rebuilt a functionally identical kernel without requiring any more
+	  information.
 
 config LOG_BUF_SHIFT
 	int "Kernel log buffer size (16 => 64KB, 17 => 128KB)"
