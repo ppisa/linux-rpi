@@ -772,6 +772,15 @@ out:
 EXPORT_SYMBOL(cpu_down);
 #endif /*CONFIG_HOTPLUG_CPU*/
 
+static cpumask_var_t __cpuinitdata cpu_defect_map;
+static int __init setup_defect_cpus(char *str)
+{
+	alloc_bootmem_cpumask_var(&cpu_defect_map);
+	cpulist_parse(str, cpu_defect_map);
+	return 0;
+}
+early_param("defect_cpus", setup_defect_cpus);
+
 /* Requires cpu_add_remove_lock to be held */
 static int _cpu_up(unsigned int cpu, int tasks_frozen)
 {
@@ -829,6 +838,11 @@ out:
 int cpu_up(unsigned int cpu)
 {
 	int err = 0;
+
+	if (cpumask_test_cpu(cpu, cpu_defect_map)) {
+		pr_warn("Can't online cpu %u. It's marked defect.\n", cpu);
+		return -ENODEV;
+	}
 
 	if (!cpu_possible(cpu)) {
 		pr_err("can't online cpu %d because it is not configured as may-hotadd at boot time\n",

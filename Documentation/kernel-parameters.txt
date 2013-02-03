@@ -843,6 +843,15 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 			Defaults to the default architecture's huge page size
 			if not specified.
 
+	defect_cpus=	[SMP] Exclude defect cpus from being used
+			Format:
+			<cpu number>,...,<cpu number>
+			or
+			<cpu number>-<cpu number>
+			(must be a positive range in ascending order)
+			or a mixture
+			<cpu number>,...,<cpu number>-<cpu number>
+
 	dhash_entries=	[KNL]
 			Set number of hash buckets for dentry cache.
 
