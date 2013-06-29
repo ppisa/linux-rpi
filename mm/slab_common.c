@@ -838,7 +838,6 @@ static void *s_start(struct seq_file *m, loff_t *pos)
 {
 	loff_t n = *pos;
 
-	mutex_lock(&slab_mutex);
 	if (!n)
 		print_slabinfo_header(m);
 
@@ -852,7 +851,6 @@ void *slab_next(struct seq_file *m, void *p, loff_t *pos)
 
 void slab_stop(struct seq_file *m, void *p)
 {
-	mutex_unlock(&slab_mutex);
 }
 
 static void
@@ -865,6 +863,7 @@ memcg_accumulate_slabinfo(struct kmem_cache *s, struct slabinfo *info)
 	if (!is_root_cache(s))
 		return;
 
+	mutex_lock(&slab_mutex);
 	for_each_memcg_cache_index(i) {
 		c = cache_from_memcg_idx(s, i);
 		if (!c)
@@ -879,6 +878,7 @@ memcg_accumulate_slabinfo(struct kmem_cache *s, struct slabinfo *info)
 		info->active_objs += sinfo.active_objs;
 		info->num_objs += sinfo.num_objs;
 	}
+	mutex_unlock(&slab_mutex);
 }
 
 int cache_show(struct kmem_cache *s, struct seq_file *m)
