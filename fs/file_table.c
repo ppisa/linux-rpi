@@ -36,7 +36,7 @@ struct files_stat_struct files_stat = {
 	.max_files = NR_FILE
 };
 
-DEFINE_STATIC_LGLOCK(files_lglock);
+DEFINE_LGLOCK(files_lglock);
 
 /* SLAB cache for file structures */
 static struct kmem_cache *filp_cachep __read_mostly;
@@ -360,7 +360,7 @@ static inline int file_list_cpu(struct file *file)
 }
 
 /* helper for file_sb_list_add to reduce ifdefs */
-static inline void __file_sb_list_add(struct file *file, struct super_block *sb)
+inline void __file_sb_list_add(struct file *file, struct super_block *sb)
 {
 	struct list_head *list;
 #ifdef CONFIG_SMP
@@ -373,6 +373,7 @@ static inline void __file_sb_list_add(struct file *file, struct super_block *sb)
 #endif
 	list_add(&file->f_u.fu_list, list);
 }
+EXPORT_SYMBOL(__file_sb_list_add);
 
 /**
  * file_sb_list_add - add a file to the sb's file list
