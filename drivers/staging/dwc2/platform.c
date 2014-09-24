@@ -127,6 +127,7 @@ static int dwc2_driver_probe(struct platform_device *dev)
 }
 
 static const struct of_device_id dwc2_of_match_table[] = {
+	{ .compatible = "brcm,bcm2835-usb" /*, .data = &params_bcm2835*/ },
 	{ .compatible = "snps,dwc2" },
 	{},
 };
