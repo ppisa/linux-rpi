@@ -137,7 +137,7 @@ static int sdhci_locked=0;
 void sdhci_spin_lock(struct sdhci_host *host)
 {
 	spin_lock(&host->lock);
-#ifdef CONFIG_PREEMPT
+#if defined(CONFIG_PREEMPT) && defined(CONFIG_MMC_SDHCI_BCM2708)
 	if(enable_llm)
 	{
 		disable_irq_nosync(host->irq);
@@ -150,7 +150,7 @@ void sdhci_spin_lock(struct sdhci_host *host)
 
 void sdhci_spin_unlock(struct sdhci_host *host)
 {
-#ifdef CONFIG_PREEMPT
+#if defined(CONFIG_PREEMPT) && defined(CONFIG_MMC_SDHCI_BCM2708)
 	if(enable_llm)
 	{
 		local_irq_disable();
@@ -164,7 +164,7 @@ void sdhci_spin_unlock(struct sdhci_host *host)
 
 void sdhci_spin_lock_irqsave(struct sdhci_host *host,unsigned long *flags)
 {
-#ifdef CONFIG_PREEMPT
+#if defined(CONFIG_PREEMPT) && defined(CONFIG_MMC_SDHCI_BCM2708)
 	if(enable_llm)
 	{
 		while(sdhci_locked)
@@ -184,7 +184,7 @@ void sdhci_spin_lock_irqsave(struct sdhci_host *host,unsigned long *flags)
 
 void sdhci_spin_unlock_irqrestore(struct sdhci_host *host,unsigned long flags)
 {
-#ifdef CONFIG_PREEMPT
+#if defined(CONFIG_PREEMPT) && defined(CONFIG_MMC_SDHCI_BCM2708)
 	if(enable_llm)
 	{
 		local_irq_disable();
@@ -198,7 +198,7 @@ void sdhci_spin_unlock_irqrestore(struct sdhci_host *host,unsigned long flags)
 
 static void sdhci_spin_enable_schedule(struct sdhci_host *host)
 {
-#ifdef CONFIG_PREEMPT
+#if defined(CONFIG_PREEMPT) && defined(CONFIG_MMC_SDHCI_BCM2708)
 	if(enable_llm)
 	{
 		sdhci_locked = 1;
@@ -209,7 +209,7 @@ static void sdhci_spin_enable_schedule(struct sdhci_host *host)
 
 static void sdhci_spin_disable_schedule(struct sdhci_host *host)
 {
-#ifdef CONFIG_PREEMPT
+#if defined(CONFIG_PREEMPT) && defined(CONFIG_MMC_SDHCI_BCM2708)
 	if(enable_llm)
 	{
 		preempt_disable();
@@ -220,6 +220,10 @@ static void sdhci_spin_disable_schedule(struct sdhci_host *host)
 
 
 #undef spin_lock_irqsave
+#undef spin_unlock_irqrestore
+#undef spin_lock
+#undef spin_unlock
+
 #define spin_lock_irqsave(host_lock, flags)      sdhci_spin_lock_irqsave(container_of(host_lock, struct sdhci_host, lock), &flags)
 #define spin_unlock_irqrestore(host_lock, flags) sdhci_spin_unlock_irqrestore(container_of(host_lock, struct sdhci_host, lock), flags)
 
