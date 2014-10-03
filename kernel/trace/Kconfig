@@ -325,6 +325,38 @@ config MISSED_TIMER_OFFSETS_HIST
 
 	      /sys/kernel/debug/tracing/latency_hist/enable/timerandwakeup
 
+config SWITCHTIME_HIST
+	depends on HIGH_RES_TIMERS
+	depends on HAVE_SYSCALL_TRACEPOINTS
+	depends on WAKEUP_LATENCY_HIST
+	select GENERIC_TRACER
+	select FTRACE_SYSCALLS
+	bool "Context Switch Time Histogram"
+	help
+	  Generate a histogram of the context switch duration per CPU. The
+	  histograms are disabled by default. To enable them, write a non-zero
+	  number to
+
+	      /sys/kernel/debug/tracing/latency_hist/enable/switchtime
+
+	  The histogram data will be located in the debug file system at
+
+	      /sys/kernel/debug/tracing/latency_hist/switchtime
+
+	  If both Scheduling Latency Histogram, Missed Timer Offsets and the
+	  newly provided Context Switch Time Histogram are selected, additional
+	  histogram data will be collected from the sum of the wakeup latency,
+	  the timer latency, if available, and the switch time per CPU. These
+	  histograms are available in the
+
+	      /sys/kernel/debug/tracing/latency_hist/timerwakeupswitch
+
+	  directory. They reflect the apparent interrupt and scheduling latency
+	  and are best suitable to determine the worst-case latency of a given
+	  system. To enable these histograms, write a non-zero number to
+
+	      /sys/kernel/debug/tracing/latency_hist/enable/timerwakeupswitch
+
 config ENABLE_DEFAULT_TRACERS
 	bool "Trace process context switches and events"
 	depends on !GENERIC_TRACER

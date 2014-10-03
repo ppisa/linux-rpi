@@ -1668,6 +1668,14 @@ struct task_struct {
 	long timer_offset;
 #endif
 #endif
+#ifdef CONFIG_SWITCHTIME_HIST
+	u64 switchtime_timestamp_hist;
+	struct task_struct *switchtime_prev;
+#if defined(CONFIG_WAKEUP_LATENCY_HIST) && \
+	defined(CONFIG_MISSED_TIMER_OFFSETS_HIST)
+	unsigned long switchtime_timerandwakeup;
+#endif
+#endif
 #endif /* CONFIG_TRACING */
 #ifdef CONFIG_MEMCG /* memcg uses this to do batch job */
 	unsigned int memcg_kmem_skip_account;
