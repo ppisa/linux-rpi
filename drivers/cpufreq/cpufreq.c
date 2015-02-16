@@ -205,8 +205,16 @@ struct cpufreq_policy *cpufreq_cpu_get(unsigned int cpu)
 	if (cpufreq_disabled() || (cpu >= nr_cpu_ids))
 		return NULL;
 
-	if (!down_read_trylock(&cpufreq_rwsem))
-		return NULL;
+	if (!down_read_trylock(&cpufreq_rwsem)) {
+		struct rt_mutex *rtm = &cpufreq_rwsem.lock;
+		struct task_struct *owner = rtm->owner;
+		if (owner->pid != current->pid) {
+			printk(KERN_INFO
+			    "%s: owner->pid %d (%s), current->pid %d\n",
+			    __func__, owner->pid, owner->comm, current->pid);
+			return NULL;
+		}
+	}
 
 	/* get the cpufreq driver */
 	read_lock_irqsave(&cpufreq_driver_lock, flags);
