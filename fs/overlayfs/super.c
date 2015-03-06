@@ -603,7 +603,7 @@ static int ovl_mount_dir(const char *name, struct path *path)
 	return err;
 }
 
-static bool ovl_is_allowed_fs_type(struct dentry *root)
+static bool ovl_is_allowed_fs_type(struct dentry *root, int for_upper)
 {
 	const struct dentry_operations *dop = root->d_op;
 
@@ -614,9 +614,11 @@ static bool ovl_is_allowed_fs_type(struct dentry *root)
 	 *  - filesystems with case insensitive names
 	 */
 	if (dop &&
-	    (dop->d_manage || dop->d_automount ||
-	     dop->d_revalidate || dop->d_weak_revalidate ||
-	     dop->d_compare || dop->d_hash)) {
+	    (dop->d_manage || dop->d_compare || dop->d_hash)) {
+		return false;
+	}
+	if (dop && for_upper &&
+	    (dop->d_automount || dop->d_revalidate || dop->d_weak_revalidate)) {
 		return false;
 	}
 	return true;
@@ -697,12 +699,12 @@ static int ovl_fill_super(struct super_block *sb, void *data, int silent)
 		goto out_put_workpath;
 	}
 
-	if (!ovl_is_allowed_fs_type(upperpath.dentry)) {
+	if (!ovl_is_allowed_fs_type(upperpath.dentry, 1)) {
 		pr_err("overlayfs: filesystem of upperdir is not supported\n");
 		goto out_put_workpath;
 	}
 
-	if (!ovl_is_allowed_fs_type(lowerpath.dentry)) {
+	if (!ovl_is_allowed_fs_type(lowerpath.dentry, 0)) {
 		pr_err("overlayfs: filesystem of lowerdir is not supported\n");
 		goto out_put_workpath;
 	}
