@@ -678,6 +678,14 @@ static inline u64 rq_clock_task(struct rq *rq)
 	return rq->clock_task;
 }
 
+#ifdef CONFIG_CPU_IDLERUNTIME
+extern DEFINE_PER_CPU(unsigned long long, idlestart);
+extern DEFINE_PER_CPU(unsigned long long, idlestop);
+extern DEFINE_PER_CPU(unsigned long long, idletime);
+extern DEFINE_PER_CPU(unsigned long long, runtime);
+extern DEFINE_PER_CPU(raw_spinlock_t, idleruntime_lock);
+#endif
+
 #ifdef CONFIG_NUMA_BALANCING
 extern void sched_setnuma(struct task_struct *p, int node);
 extern int migrate_task_to(struct task_struct *p, int cpu);
